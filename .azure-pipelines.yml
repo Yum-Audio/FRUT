@@ -6,7 +6,7 @@ trigger:
 parameters:
   - name: juceVersions
     type: object
-    default: [4.2.0, 4.3.1, 5.0.0, 5.2.1, 5.3.1, 5.4.3, 5.4.7, 6.0.5, 6.1.0]
+    default: [4.2.0, 4.3.1, 5.0.0, 5.2.1, 5.3.1, 5.4.3, 5.4.7, 6.0.5, 6.1.6]
 
 jobs:
   - job: iOS
@@ -65,17 +65,6 @@ jobs:
       vmImage: macOS-10.15
     steps:
       - template: ci/azure-pipelines/steps-Xcode.yml
-        parameters:
-          juceVersions: ${{ parameters.juceVersions }}
-
-  - job: Windows_VS2017
-    displayName: Windows / Visual Studio 2017
-    pool:
-      vmImage: vs2017-win2016
-    variables:
-      cmakeGenerator: "Visual Studio 15 2017"
-    steps:
-      - template: ci/azure-pipelines/steps-VS.yml
         parameters:
           juceVersions: ${{ parameters.juceVersions }}
 

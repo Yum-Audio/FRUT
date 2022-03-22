@@ -4,13 +4,16 @@ branches:
 
 clone_depth: 50
 
-image: Visual Studio 2015
-
 environment:
   matrix:
-    - GENERATOR: "MinGW Makefiles"
-    - GENERATOR: "Visual Studio 12 2013"
-    - GENERATOR: "Visual Studio 14 2015"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      GENERATOR: MinGW Makefiles
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      GENERATOR: Visual Studio 12 2013
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      GENERATOR: Visual Studio 14 2015
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      GENERATOR: Visual Studio 15 2017
 
 install:
   - cmake --version
@@ -31,13 +34,13 @@ install:
     -- https://github.com/juce-framework/JUCE.git ci/tmp/JUCE-5.4.7
   - git clone --branch=6.0.5 --depth=1 --single-branch
     -- https://github.com/juce-framework/JUCE.git ci/tmp/JUCE-6.0.5
-  - git clone --branch=6.1.0 --depth=1 --single-branch
-    -- https://github.com/juce-framework/JUCE.git ci/tmp/JUCE-6.1.0
+  - git clone --branch=6.1.6 --depth=1 --single-branch
+    -- https://github.com/juce-framework/JUCE.git ci/tmp/JUCE-6.1.6
 
 for:
   - matrix:
       only:
-        - GENERATOR: "MinGW Makefiles"
+        - GENERATOR: MinGW Makefiles
 
     build_script:
       - set PATH=%PATH:C:\Program Files\Git\usr\bin;=%
@@ -118,16 +121,8 @@ for:
         cmake .. -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
         -DJUCE_ROOT="%APPVEYOR_BUILD_FOLDER%/ci/tmp/JUCE-6.0.5"
 
-      # Configure and build FRUT with JUCE 6.1.0
-      - cd %APPVEYOR_BUILD_FOLDER%\build_Debug
-      - >
-        cmake .. -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug
-        -DJUCE_ROOT="%APPVEYOR_BUILD_FOLDER%/ci/tmp/JUCE-6.1.0"
-      - cmake --build . --parallel
-      - cd %APPVEYOR_BUILD_FOLDER%\build_Release
-      - >
-        cmake .. -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
-        -DJUCE_ROOT="%APPVEYOR_BUILD_FOLDER%/ci/tmp/JUCE-6.1.0"
+      # JUCE 6.1.6 doesn't build with MinGW 5.3.0 due to how juce::UUIDGetter is defined
+      # in juce_core/native/juce_win32_ComSmartPtr.h
 
       # Build and install FRUT in ./prefix
       - cmake .. -DCMAKE_INSTALL_PREFIX="%APPVEYOR_BUILD_FOLDER%/prefix"
@@ -175,14 +170,14 @@ for:
         -DJucer2CMake_EXE="prefix/FRUT/bin/Jucer2CMake.exe"
         -P ci/apply-Jucer2CMake-reprojucer-to-JUCE-jucers.cmake
       - >
-        cmake -DJUCE_VERSION="6.1.0"
+        cmake -DJUCE_VERSION="6.1.6"
         -DJucer2CMake_EXE="prefix/FRUT/bin/Jucer2CMake.exe"
         -P ci/apply-Jucer2CMake-reprojucer-to-JUCE-jucers.cmake
       - git diff --exit-code
 
   - matrix:
       only:
-        - GENERATOR: "Visual Studio 12 2013"
+        - GENERATOR: Visual Studio 12 2013
 
     build_script:
       - mkdir %APPVEYOR_BUILD_FOLDER%\build
@@ -254,8 +249,8 @@ build_script:
   - cmake .. -G "%GENERATOR%" -DJUCE_ROOT="%APPVEYOR_BUILD_FOLDER%/ci/tmp/JUCE-6.0.5"
   - cmake --build . --config Debug --parallel
 
-  # Configure and build FRUT with JUCE 6.1.0
-  - cmake .. -G "%GENERATOR%" -DJUCE_ROOT="%APPVEYOR_BUILD_FOLDER%/ci/tmp/JUCE-6.1.0"
+  # Configure and build FRUT with JUCE 6.1.6
+  - cmake .. -G "%GENERATOR%" -DJUCE_ROOT="%APPVEYOR_BUILD_FOLDER%/ci/tmp/JUCE-6.1.6"
   - cmake --build . --config Debug --parallel
 
   # Build and install FRUT in ./prefix
@@ -304,7 +299,7 @@ test_script:
     -DJucer2CMake_EXE="prefix/FRUT/bin/Jucer2CMake.exe"
     -P ci/apply-Jucer2CMake-reprojucer-to-JUCE-jucers.cmake
   - >
-    cmake -DJUCE_VERSION="6.1.0"
+    cmake -DJUCE_VERSION="6.1.6"
     -DJucer2CMake_EXE="prefix/FRUT/bin/Jucer2CMake.exe"
     -P ci/apply-Jucer2CMake-reprojucer-to-JUCE-jucers.cmake
   - git diff --quiet
@@ -351,5 +346,5 @@ test_script:
   # Configure all JUCE 6.0.5 projects
   - cmake .. -G "%GENERATOR%" -DJUCE_VERSION="6.0.5"
 
-  # Configure all JUCE 6.1.0 projects
-  - cmake .. -G "%GENERATOR%" -DJUCE_VERSION="6.1.0"
+  # Configure all JUCE 6.1.6 projects
+  - cmake .. -G "%GENERATOR%" -DJUCE_VERSION="6.1.6"
