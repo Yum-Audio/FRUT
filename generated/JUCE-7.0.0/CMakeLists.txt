@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022  Alain Martin
+# Copyright (C) 2022  Alain Martin
 #
 # This file is part of FRUT.
 #
@@ -25,22 +25,27 @@ endif()
 get_filename_component(JUCE_ROOT "${JUCE_ROOT}" ABSOLUTE BASE_DIR "${CMAKE_BINARY_DIR}")
 
 
-project(JUCE-6.1.6)
+project(JUCE-7.0.0)
 
 
 if(MSVC_VERSION LESS 1900)
-  message(WARNING "Skipping JUCE-6.1.6 because none of its sub-projects supports the "
+  message(WARNING "Skipping JUCE-7.0.0 because none of its sub-projects supports the "
     "\"Visual Studio 2013\" exporter"
   )
   return()
+elseif(MSVC_VERSION LESS 1910)
+  message(WARNING "Skipping JUCE-7.0.0 because none of its sub-projects supports the "
+    "\"Visual Studio 2015\" exporter"
+  )
+  return()
 elseif(WIN32 AND NOT MSVC)
-  message(WARNING "Skipping JUCE-6.1.6 because none of its sub-projects supports the "
+  message(WARNING "Skipping JUCE-7.0.0 because none of its sub-projects supports the "
     "\"Code::Blocks (Windows)\" exporter"
   )
   return()
 elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL Linux
     AND CMAKE_EXTRA_GENERATOR STREQUAL CodeBlocks)
-  message(WARNING "Skipping JUCE-6.1.6 because none of its sub-projects supports the "
+  message(WARNING "Skipping JUCE-7.0.0 because none of its sub-projects supports the "
     "\"Code::Blocks (Linux)\" exporter"
   )
   return()
@@ -63,18 +68,13 @@ add_subdirectory("extras/AudioPluginHost")
 if(NOT IOS)
   set(Projucer_jucer_FILE "${JUCE_ROOT}/extras/Projucer/Projucer.jucer")
   add_subdirectory("extras/Projucer")
-endif()
 
-
-# All exporters but "Xcode (iOS)" and "Visual Studio 2015"
-
-if(NOT IOS AND NOT MSVC_VERSION EQUAL 1900)
   set(UnitTestRunner_jucer_FILE "${JUCE_ROOT}/extras/UnitTestRunner/UnitTestRunner.jucer")
   add_subdirectory("extras/UnitTestRunner")
 endif()
 
 
-# All exporters but "Visual Studio 2019", "Visual Studio 2017", and "Visual Studio 2015"
+# All exporters but "Visual Studio 2019" and "Visual Studio 2017"
 
 if(NOT MSVC_VERSION LESS 1930)
   set(AudioPerformanceTest_jucer_FILE
@@ -89,7 +89,7 @@ if(NOT MSVC_VERSION LESS 1930)
 endif()
 
 
-# "Xcode (macOS)", "Visual Studio 2022" and "Linux Makefile" exporters
+# "Xcode (MacOSX)", "Visual Studio 2022" and "Linux Makefile" exporters
 
 if((APPLE AND NOT IOS) OR MSVC_VERSION GREATER 1929
     OR CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")

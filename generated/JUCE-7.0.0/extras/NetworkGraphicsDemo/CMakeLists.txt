@@ -21,7 +21,7 @@ get_filename_component(NetworkGraphicsDemo_jucer_FILE
 
 jucer_project_begin(
   JUCER_FORMAT_VERSION "1"
-  JUCER_VERSION "6.0.5"
+  JUCER_VERSION "7.0.0"
   PROJECT_FILE "${NetworkGraphicsDemo_jucer_FILE}"
   PROJECT_ID "gWI5Ir"
 )
@@ -46,7 +46,7 @@ jucer_project_files("NetworkGraphicsDemo/Source"
   .         .         .         "Source/Demos.h"
   x         .         .         "Source/Main.cpp"
   .         .         .         "Source/MasterComponent.h"
-  .         .         .         "Source/SlaveComponent.h"
+  .         .         .         "Source/ClientComponent.h"
   .         .         .         "Source/SharedCanvas.h"
 )
 
@@ -94,6 +94,8 @@ jucer_project_module(
   # JUCE_PLUGINHOST_VST3
   # JUCE_PLUGINHOST_AU
   # JUCE_PLUGINHOST_LADSPA
+  # JUCE_PLUGINHOST_LV2
+  # JUCE_PLUGINHOST_ARA
   # JUCE_CUSTOM_VST3_SDK
 )
 
@@ -196,18 +198,18 @@ jucer_export_target_configuration(
 )
 
 jucer_export_target(
-  "Visual Studio 2019"
+  "Visual Studio 2022"
 )
 
 jucer_export_target_configuration(
-  "Visual Studio 2019"
+  "Visual Studio 2022"
   NAME "Debug"
   DEBUG_MODE ON
   BINARY_NAME "JUCE Network Graphics Demo"
 )
 
 jucer_export_target_configuration(
-  "Visual Studio 2019"
+  "Visual Studio 2022"
   NAME "Release"
   DEBUG_MODE OFF
   BINARY_NAME "JUCE Network Graphics Demo"

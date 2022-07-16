@@ -77,6 +77,7 @@ FRUT currently contains:
   - ``examples`` and ``extras`` projects from `JUCE 5.4.7`_ (in `generated/JUCE-5.4.7`_)
   - ``examples`` and ``extras`` projects from `JUCE 6.0.5`_ (in `generated/JUCE-6.0.5`_)
   - ``examples`` and ``extras`` projects from `JUCE 6.1.6`_ (in `generated/JUCE-6.1.6`_)
+  - ``examples`` and ``extras`` projects from `JUCE 7.0.0`_ (in `generated/JUCE-7.0.0`_)
 
 
 Requirements
@@ -99,7 +100,7 @@ known as "export targets"):
     <tr><th>Supported</th><th>Exporter</th><th>CMake requirements and options</th><th>Missing features</th></tr>
   </thead>
   <tbody>
-    <tr><td align="center">✔️</td><td>Xcode (MacOSX)</td><td></td><td rowspan="2">
+    <tr><td align="center">✔️</td><td>Xcode (macOS)</td><td></td><td rowspan="2">
       <a href="https://github.com/McMartin/FRUT/labels/exporter%3A%20Xcode">2 unsupported Xcode exporter settings</a>
     </td></tr>
     <tr><td align="center">✔️</td><td>Xcode (iOS)</td><td>version 3.14 minimum<br/><pre>-G Xcode -DCMAKE_SYSTEM_NAME=iOS</pre></td></tr>
@@ -366,6 +367,9 @@ contributors:
       <a href="https://github.com/McMartin/FRUT/issues?q=is%3Aissue+author%3Abutchwarns" title="Bug reports">🐛</a>
     </td>
     <td>
+      <a href="https://github.com/SuganthanBC"><img src="https://github.com/SuganthanBC.png" width="100"><br />Suganthan BC</a>
+      <br />
+      <a href="https://github.com/McMartin/FRUT/issues?q=is%3Aissue+author%3ASuganthanBC" title="Bug reports">🐛</a>
     </td>
     <td>
     </td>
@@ -419,6 +423,7 @@ even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE
 .. _generated/JUCE-5.4.7: generated/JUCE-5.4.7
 .. _generated/JUCE-6.0.5: generated/JUCE-6.0.5
 .. _generated/JUCE-6.1.6: generated/JUCE-6.1.6
+.. _generated/JUCE-7.0.0: generated/JUCE-7.0.0
 
 .. _CMake Generators: https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html
 .. _CMake: https://cmake.org
@@ -432,6 +437,7 @@ even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE
 .. _JUCE 5.4.7: https://github.com/juce-framework/JUCE/tree/5.4.7
 .. _JUCE 6.0.5: https://github.com/juce-framework/JUCE/tree/6.0.5
 .. _JUCE 6.1.6: https://github.com/juce-framework/JUCE/tree/6.1.6
+.. _JUCE 7.0.0: https://github.com/juce-framework/JUCE/tree/7.0.0
 .. _JUCE: https://github.com/juce-framework/JUCE
 .. _Projucer: https://juce.com/discover/projucer
 .. _all-contributors: https://github.com/all-contributors/all-contributors

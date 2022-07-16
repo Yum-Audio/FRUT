@@ -21,14 +21,14 @@ get_filename_component(DemoRunner_jucer_FILE
 
 jucer_project_begin(
   JUCER_FORMAT_VERSION "1"
-  JUCER_VERSION "6.0.5"
+  JUCER_VERSION "7.0.0"
   PROJECT_FILE "${DemoRunner_jucer_FILE}"
   PROJECT_ID "yj7xMM"
 )
 
 jucer_project_settings(
   PROJECT_NAME "DemoRunner"
-  PROJECT_VERSION "6.0.5"
+  PROJECT_VERSION "7.0.0"
   COMPANY_NAME "Raw Material Software Limited"
   COMPANY_COPYRIGHT "Copyright (c) 2020 - Raw Material Software Limited"
   COMPANY_WEBSITE "https://www.juce.com/"
@@ -38,7 +38,7 @@ jucer_project_settings(
   REPORT_JUCE_APP_USAGE OFF # Required for closed source applications without an Indie or Pro JUCE license
   DISPLAY_THE_JUCE_SPLASH_SCREEN ON # Required for closed source applications without an Indie or Pro JUCE license
   PROJECT_TYPE "GUI Application"
-  BUNDLE_IDENTIFIER "com.rmsl.juce.demorunner"
+  BUNDLE_IDENTIFIER "com.rmsl.jucedemorunner"
   CXX_LANGUAGE_STANDARD "C++14"
   PREPROCESSOR_DEFINITIONS
     "JUCE_DEMO_RUNNER=1"
@@ -112,9 +112,11 @@ jucer_project_module(
   juce_audio_processors
   PATH "../../modules"
   # JUCE_PLUGINHOST_VST
-  # JUCE_PLUGINHOST_VST3
+  JUCE_PLUGINHOST_VST3 ON
   # JUCE_PLUGINHOST_AU
   # JUCE_PLUGINHOST_LADSPA
+  JUCE_PLUGINHOST_LV2 ON
+  # JUCE_PLUGINHOST_ARA
   # JUCE_CUSTOM_VST3_SDK
 )
 
@@ -123,11 +125,6 @@ jucer_project_module(
   PATH "../../modules"
   # JUCE_USE_CDREADER
   # JUCE_USE_CDBURNER
-)
-
-jucer_project_module(
-  juce_blocks_basics
-  PATH "../../modules"
 )
 
 jucer_project_module(
@@ -229,17 +226,18 @@ jucer_project_module(
 
 jucer_export_target(
   "Xcode (macOS)"
+  # VST3_SDK_FOLDER
   ICON_SMALL "Source/JUCEAppIcon.png"
   ICON_LARGE "Source/JUCEAppIcon.png"
   CUSTOM_XCODE_RESOURCE_FOLDERS
     "../Assets"
     "../Audio"
-    "../BLOCKS"
     "../DSP"
     "../GUI"
     "../Utilities"
   MICROPHONE_ACCESS ON
   CAMERA_ACCESS ON
+  BLUETOOTH_ACCESS ON
 )
 
 jucer_export_target_configuration(
@@ -280,6 +278,16 @@ jucer_export_target(
   ICON_LARGE "Source/JUCEAppIcon.png"
   CUSTOM_XCODE_RESOURCE_FOLDERS
     "../Assets"
+  IPHONE_SCREEN_ORIENTATION
+    "Portrait"
+    "Portrait Upside Down"
+    "Landscape Left"
+    "Landscape Right"
+  IPAD_SCREEN_ORIENTATION
+    "Portrait"
+    "Portrait Upside Down"
+    "Landscape Left"
+    "Landscape Right"
   FILE_SHARING_ENABLED ON
   SUPPORT_DOCUMENT_BROWSER ON
   MICROPHONE_ACCESS ON
@@ -303,31 +311,8 @@ jucer_export_target_configuration(
 )
 
 jucer_export_target(
-  "Visual Studio 2015"
-  EXTRA_COMPILER_FLAGS
-    "/w44265"
-    "/w45038"
-    "/w44062"
-    "/bigobj"
-  ICON_SMALL "Source/JUCEAppIcon.png"
-  ICON_LARGE "Source/JUCEAppIcon.png"
-)
-
-jucer_export_target_configuration(
-  "Visual Studio 2015"
-  NAME "Debug"
-  DEBUG_MODE ON
-)
-
-jucer_export_target_configuration(
-  "Visual Studio 2015"
-  NAME "Release"
-  DEBUG_MODE OFF
-  RUNTIME_LIBRARY "Use static runtime"
-)
-
-jucer_export_target(
   "Visual Studio 2017"
+  # VST3_SDK_FOLDER
   EXTRA_COMPILER_FLAGS
     "/w44265"
     "/w45038"
@@ -351,6 +336,7 @@ jucer_export_target_configuration(
 
 jucer_export_target(
   "Visual Studio 2019"
+  # VST3_SDK_FOLDER
   EXTRA_COMPILER_FLAGS
     "/w44265"
     "/w45038"
@@ -368,6 +354,32 @@ jucer_export_target_configuration(
 
 jucer_export_target_configuration(
   "Visual Studio 2019"
+  NAME "Release"
+  DEBUG_MODE OFF
+  BINARY_NAME "DemoRunner"
+  RUNTIME_LIBRARY "Use static runtime"
+)
+
+jucer_export_target(
+  "Visual Studio 2022"
+  # VST3_SDK_FOLDER
+  EXTRA_COMPILER_FLAGS
+    "/w44265"
+    "/w45038"
+    "/w44062"
+  ICON_SMALL "Source/JUCEAppIcon.png"
+  ICON_LARGE "Source/JUCEAppIcon.png"
+)
+
+jucer_export_target_configuration(
+  "Visual Studio 2022"
+  NAME "Debug"
+  DEBUG_MODE ON
+  BINARY_NAME "DemoRunner"
+)
+
+jucer_export_target_configuration(
+  "Visual Studio 2022"
   NAME "Release"
   DEBUG_MODE OFF
   BINARY_NAME "DemoRunner"

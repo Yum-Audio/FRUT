@@ -37,7 +37,7 @@ set(Reprojucer.cmake_DIR "${CMAKE_CURRENT_LIST_DIR}")
 set(Reprojucer_data_DIR "${Reprojucer.cmake_DIR}/data")
 
 set(Reprojucer_supported_exporters
-  "Xcode (MacOSX)"
+  "Xcode (macOS)"
   "Xcode (iOS)"
   "Visual Studio 2022"
   "Visual Studio 2019"
@@ -579,7 +579,9 @@ function(jucer_project_module module_name PATH_KEYWORD modules_folder)
   unset(module_info_version)
   set(module_info_searchpaths "")
   set(module_info_OSXFrameworks "")
+  set(module_info_WeakOSXFrameworks "")
   set(module_info_iOSFrameworks "")
+  set(module_info_WeakiOSFrameworks "")
   set(module_info_linuxPackages "")
   set(module_info_linuxLibs "")
   set(module_info_mingwLibs "")
@@ -626,11 +628,15 @@ function(jucer_project_module module_name PATH_KEYWORD modules_folder)
 
   if(IOS)
     string(REGEX REPLACE "[ ,]+" ";" xcode_frameworks "${module_info_iOSFrameworks}")
+    string(REGEX REPLACE "[ ,]+" ";" xcode_weak_frameworks "${module_info_WeakiOSFrameworks}")
   else()
     string(REGEX REPLACE "[ ,]+" ";" xcode_frameworks "${module_info_OSXFrameworks}")
+    string(REGEX REPLACE "[ ,]+" ";" xcode_weak_frameworks "${module_info_WeakOSXFrameworks}")
   endif()
   list(APPEND JUCER_PROJECT_XCODE_FRAMEWORKS ${xcode_frameworks})
   set(JUCER_PROJECT_XCODE_FRAMEWORKS "${JUCER_PROJECT_XCODE_FRAMEWORKS}" PARENT_SCOPE)
+  list(APPEND JUCER_PROJECT_XCODE_WEAK_FRAMEWORKS ${xcode_weak_frameworks})
+  set(JUCER_PROJECT_XCODE_WEAK_FRAMEWORKS "${JUCER_PROJECT_XCODE_WEAK_FRAMEWORKS}" PARENT_SCOPE)
 
   string(REGEX REPLACE "[ ,]+" ";" linux_packages "${module_info_linuxPackages}")
   list(APPEND JUCER_PROJECT_LINUX_PACKAGES ${linux_packages})
@@ -738,6 +744,9 @@ endfunction()
 
 function(jucer_export_target exporter)
 
+  if(exporter STREQUAL "Xcode (MacOSX)")
+    set(exporter "Xcode (macOS)")
+  endif()
   if(NOT exporter IN_LIST Reprojucer_supported_exporters)
     message(FATAL_ERROR "Unsupported exporter: ${exporter}\n"
       "Supported exporters: ${Reprojucer_supported_exporters}"
@@ -760,7 +769,7 @@ function(jucer_export_target exporter)
     "EXTERNAL_LIBRARIES_TO_LINK"
   )
 
-  if(exporter STREQUAL "Xcode (MacOSX)" OR exporter STREQUAL "Xcode (iOS)")
+  if(exporter STREQUAL "Xcode (macOS)" OR exporter STREQUAL "Xcode (iOS)")
     list(APPEND single_value_keywords
       "MICROPHONE_ACCESS"
       "MICROPHONE_ACCESS_TEXT"
@@ -795,7 +804,7 @@ function(jucer_export_target exporter)
     endif()
   endif()
 
-  if(exporter STREQUAL "Xcode (MacOSX)")
+  if(exporter STREQUAL "Xcode (macOS)")
     list(APPEND single_value_keywords
       "VST3_SDK_FOLDER"
       "AAX_SDK_FOLDER"
@@ -1530,6 +1539,9 @@ function(jucer_export_target_configuration
   exporter NAME_KEYWORD config DEBUG_MODE_KEYWORD is_debug
 )
 
+  if(exporter STREQUAL "Xcode (MacOSX)")
+    set(exporter "Xcode (macOS)")
+  endif()
   if(NOT exporter IN_LIST Reprojucer_supported_exporters)
     message(FATAL_ERROR "Unsupported exporter: ${exporter}\n"
       "Supported exporters: ${Reprojucer_supported_exporters}"
@@ -1583,7 +1595,7 @@ function(jucer_export_target_configuration
     "LINK_TIME_OPTIMISATION"
   )
 
-  if(exporter STREQUAL "Xcode (MacOSX)" OR exporter STREQUAL "Xcode (iOS)")
+  if(exporter STREQUAL "Xcode (macOS)" OR exporter STREQUAL "Xcode (iOS)")
     list(APPEND single_value_keywords
       "ENABLE_PLUGIN_COPY_STEP"
       "VST_BINARY_LOCATION"
@@ -1605,16 +1617,20 @@ function(jucer_export_target_configuration
     )
   endif()
 
-  if(exporter STREQUAL "Xcode (MacOSX)")
+  if(exporter STREQUAL "Xcode (macOS)")
     list(APPEND single_value_keywords
+      "MACOS_BASE_SDK"
+      "MACOS_BASE_SDK_VERSION"
       "OSX_BASE_SDK_VERSION"
+      "MACOS_DEPLOYMENT_TARGET"
       "OSX_DEPLOYMENT_TARGET"
+      "MACOS_ARCHITECTURE"
       "OSX_ARCHITECTURE"
     )
   endif()
 
   if(exporter STREQUAL "Xcode (iOS)")
-    list(APPEND single_value_keywords "IOS_DEPLOYMENT_TARGET")
+    list(APPEND single_value_keywords "IOS_BASE_SDK" "IOS_DEPLOYMENT_TARGET")
   endif()
 
   if(exporter MATCHES "^Visual Studio 20(22|1[9753])$")
@@ -1700,7 +1716,7 @@ function(jucer_export_target_configuration
   if(DEFINED _ADD_RECOMMENDED_COMPILER_WARNING_FLAGS)
     set(kind_text "${_ADD_RECOMMENDED_COMPILER_WARNING_FLAGS}")
     unset(kind)
-    if(exporter STREQUAL "Xcode (MacOSX)" OR exporter STREQUAL "Xcode (iOS)")
+    if(exporter STREQUAL "Xcode (macOS)" OR exporter STREQUAL "Xcode (iOS)")
       if(kind_text STREQUAL "Enabled")
         set(kind "LLVM")
       elseif(kind_text STREQUAL "Disabled")
@@ -1799,31 +1815,110 @@ function(jucer_export_target_configuration
     set(JUCER_VST_BINARY_LOCATION_${config} "${binary_location}" PARENT_SCOPE)
   endif()
 
+  if(DEFINED _MACOS_BASE_SDK)
+    set(JUCER_MACOS_BASE_SDK_${config} "${_MACOS_BASE_SDK}" PARENT_SCOPE)
+  endif()
+
+  if(DEFINED _MACOS_BASE_SDK_VERSION)
+    if(NOT (DEFINED JUCER_VERSION AND JUCER_VERSION VERSION_LESS 6.1.0))
+      message(WARNING "MACOS_BASE_SDK_VERSION is deprecated, use MACOS_BASE_SDK instead.")
+    endif()
+    set(version "${_MACOS_BASE_SDK_VERSION}")
+    if(version MATCHES "^10\\.(1[1-6]) SDK$")
+      set(JUCER_MACOS_BASE_SDK_VERSION_${config} "10.${CMAKE_MATCH_1}" PARENT_SCOPE)
+    elseif(version MATCHES "^11\\.([0-1]) SDK$")
+      set(JUCER_MACOS_BASE_SDK_VERSION_${config} "11.${CMAKE_MATCH_1}" PARENT_SCOPE)
+    elseif(NOT version STREQUAL "Default")
+      message(FATAL_ERROR "Unsupported value for MACOS_BASE_SDK_VERSION: \"${version}\"")
+    endif()
+  endif()
+
   if(DEFINED _OSX_BASE_SDK_VERSION)
+    if(NOT (DEFINED JUCER_VERSION AND JUCER_VERSION VERSION_LESS 6.1.0))
+      message(WARNING "OSX_BASE_SDK_VERSION is deprecated, use MACOS_BASE_SDK instead.")
+    elseif(NOT (DEFINED JUCER_VERSION AND JUCER_VERSION VERSION_LESS 6.0.2))
+      message(WARNING "OSX_BASE_SDK_VERSION is deprecated, use MACOS_BASE_SDK_VERSION"
+        " instead."
+      )
+    endif()
     set(version "${_OSX_BASE_SDK_VERSION}")
     if(version MATCHES "^10\\.([5-6]) SDK$"
         AND DEFINED JUCER_VERSION AND JUCER_VERSION VERSION_LESS 5.3.2)
       set(JUCER_OSX_BASE_SDK_VERSION_${config} "10.${CMAKE_MATCH_1}" PARENT_SCOPE)
-    elseif(version MATCHES "^10\\.([7-9]|1[0-5]) SDK$")
+    elseif(version MATCHES "^10\\.([7-9]|10) SDK$"
+        AND DEFINED JUCER_VERSION AND JUCER_VERSION VERSION_LESS 5.4.4)
       set(JUCER_OSX_BASE_SDK_VERSION_${config} "10.${CMAKE_MATCH_1}" PARENT_SCOPE)
-    elseif(NOT version STREQUAL "Use Default")
+    elseif(version MATCHES "^10\\.(1[1-6]) SDK$")
+      set(JUCER_OSX_BASE_SDK_VERSION_${config} "10.${CMAKE_MATCH_1}" PARENT_SCOPE)
+    elseif(version STREQUAL "11.0 SDK")
+      set(JUCER_OSX_BASE_SDK_VERSION_${config} "11.0" PARENT_SCOPE)
+    elseif(NOT version MATCHES "^(Use )?Default$")
       message(FATAL_ERROR "Unsupported value for OSX_BASE_SDK_VERSION: \"${version}\"")
     endif()
   endif()
 
+  if(DEFINED _MACOS_DEPLOYMENT_TARGET)
+    set(target "${_MACOS_DEPLOYMENT_TARGET}")
+    if(DEFINED JUCER_VERSION AND JUCER_VERSION VERSION_LESS 6.1.0)
+      if(target MATCHES "^10\\.([7-9]|1[0-6])$")
+        set(JUCER_MACOS_DEPLOYMENT_TARGET_${config} "10.${CMAKE_MATCH_1}" PARENT_SCOPE)
+      elseif(target MATCHES "^11\\.([0-1])$")
+        set(JUCER_MACOS_DEPLOYMENT_TARGET_${config} "11.${CMAKE_MATCH_1}" PARENT_SCOPE)
+      elseif(NOT target STREQUAL "Default")
+        message(FATAL_ERROR
+          "Unsupported value for MACOS_DEPLOYMENT_TARGET: \"${target}\""
+        )
+      endif()
+    endif()
+    set(JUCER_MACOS_DEPLOYMENT_TARGET_${config} "${target}" PARENT_SCOPE)
+  endif()
+
   if(DEFINED _OSX_DEPLOYMENT_TARGET)
+    if(NOT (DEFINED JUCER_VERSION AND JUCER_VERSION VERSION_LESS 6.0.2))
+      message(WARNING "OSX_DEPLOYMENT_TARGET is deprecated, use MACOS_DEPLOYMENT_TARGET"
+        " instead."
+      )
+    endif()
     set(target "${_OSX_DEPLOYMENT_TARGET}")
     if(target MATCHES "^10\\.([5-6])$"
         AND DEFINED JUCER_VERSION AND JUCER_VERSION VERSION_LESS 5.3.2)
       set(JUCER_OSX_DEPLOYMENT_TARGET_${config} "10.${CMAKE_MATCH_1}" PARENT_SCOPE)
-    elseif(target MATCHES "^10\\.([7-9]|1[0-5])$")
+    elseif(target MATCHES "^10\\.([7-9]|1[0-6])$")
       set(JUCER_OSX_DEPLOYMENT_TARGET_${config} "10.${CMAKE_MATCH_1}" PARENT_SCOPE)
-    elseif(NOT target STREQUAL "Use Default")
+    elseif(target STREQUAL "11.0")
+      set(JUCER_OSX_DEPLOYMENT_TARGET_${config} "11.0" PARENT_SCOPE)
+    elseif(NOT target MATCHES "^(Use )?Default$")
       message(FATAL_ERROR "Unsupported value for OSX_DEPLOYMENT_TARGET: \"${target}\"")
     endif()
   endif()
 
+  if(DEFINED _MACOS_ARCHITECTURE)
+    set(architecture "${_MACOS_ARCHITECTURE}")
+    unset(macos_architectures)
+    if(architecture STREQUAL "Native architecture of build machine")
+      set(xcode_archs "$(NATIVE_ARCH_ACTUAL)")
+    elseif(architecture STREQUAL "Standard 32-bit")
+      set(macos_architectures "i386")
+      set(xcode_archs "$(ARCHS_STANDARD_32_BIT)")
+    elseif(architecture STREQUAL "Standard 32/64-bit")
+      set(macos_architectures "x86_64" "i386")
+      set(xcode_archs "$(ARCHS_STANDARD_32_64_BIT)")
+    elseif(architecture STREQUAL "Standard 64-bit")
+      set(macos_architectures "x86_64")
+      set(xcode_archs "$(ARCHS_STANDARD_64_BIT)")
+    elseif(NOT architecture STREQUAL "Default")
+      message(FATAL_ERROR "Unsupported value for MACOS_ARCHITECTURE: \"${architecture}\"")
+    endif()
+    if(DEFINED macos_architectures)
+      set(JUCER_MACOS_ARCHITECTURES_${config} "${macos_architectures}" PARENT_SCOPE)
+    endif()
+    set(JUCER_XCODE_ARCHS_${config} "${xcode_archs}" PARENT_SCOPE)
+  endif()
+
   if(DEFINED _OSX_ARCHITECTURE)
+    if(NOT (DEFINED JUCER_VERSION AND JUCER_VERSION VERSION_LESS 6.0.2))
+      message(WARNING "OSX_ARCHITECTURE is deprecated, use MACOS_ARCHITECTURE instead.")
+    endif()
     set(architecture "${_OSX_ARCHITECTURE}")
     unset(osx_architectures)
     if(architecture STREQUAL "Native architecture of build machine")
@@ -1834,16 +1929,21 @@ function(jucer_export_target_configuration
     elseif(architecture STREQUAL "Universal Binary (32/64-bit)")
       set(osx_architectures "x86_64" "i386")
       set(xcode_archs "$(ARCHS_STANDARD_32_64_BIT)")
-    elseif(architecture STREQUAL "64-bit Intel")
+    elseif(architecture STREQUAL "64-bit Intel"
+        OR architecture STREQUAL "Universal Binary (64-bit)")
       set(osx_architectures "x86_64")
       set(xcode_archs "$(ARCHS_STANDARD_64_BIT)")
-    elseif(NOT architecture STREQUAL "Use Default")
+    elseif(NOT architecture MATCHES "^(Use )?Default$")
       message(FATAL_ERROR "Unsupported value for OSX_ARCHITECTURE: \"${architecture}\"")
     endif()
     if(DEFINED osx_architectures)
       set(JUCER_OSX_ARCHITECTURES_${config} "${osx_architectures}" PARENT_SCOPE)
     endif()
     set(JUCER_XCODE_ARCHS_${config} "${xcode_archs}" PARENT_SCOPE)
+  endif()
+
+  if(DEFINED _IOS_BASE_SDK)
+    set(JUCER_IOS_BASE_SDK_${config} "${_IOS_BASE_SDK}" PARENT_SCOPE)
   endif()
 
   if(DEFINED _IOS_DEPLOYMENT_TARGET)
@@ -1882,7 +1982,7 @@ function(jucer_export_target_configuration
       set(JUCER_CXX_LIBRARY_${config} "libc++" PARENT_SCOPE)
     elseif(cxx_library STREQUAL "GNU libstdc++")
       set(JUCER_CXX_LIBRARY_${config} "libstdc++" PARENT_SCOPE)
-    elseif(NOT cxx_library STREQUAL "Use Default")
+    elseif(NOT cxx_library MATCHES "^(Use )?Default$")
       message(FATAL_ERROR "Unsupported value for CXX_LIBRARY: \"${cxx_library}\"")
     endif()
   endif()
@@ -1958,7 +2058,7 @@ function(jucer_export_target_configuration
       else()
         set(flag "/MT")
       endif()
-    elseif(NOT library STREQUAL "(Default)")
+    elseif(NOT (library STREQUAL "(Default)" OR library STREQUAL "Default"))
       message(FATAL_ERROR "Unsupported value for RUNTIME_LIBRARY: \"${library}\"")
     endif()
     set(JUCER_RUNTIME_LIBRARY_FLAG_${config} "${flag}" PARENT_SCOPE)
@@ -2206,6 +2306,36 @@ function(jucer_project_end)
     endforeach()
   endforeach()
 
+  # Translate old settings to new settings
+  foreach(config IN LISTS JUCER_PROJECT_CONFIGURATIONS)
+    set(old_vars
+      "JUCER_OSX_BASE_SDK_VERSION_${config}"
+      "JUCER_OSX_DEPLOYMENT_TARGET_${config}"
+      "JUCER_OSX_ARCHITECTURES_${config}"
+      "JUCER_MACOS_BASE_SDK_VERSION_${config}"
+    )
+    set(new_vars
+      "JUCER_MACOS_BASE_SDK_VERSION_${config}"
+      "JUCER_MACOS_DEPLOYMENT_TARGET_${config}"
+      "JUCER_MACOS_ARCHITECTURES_${config}"
+      "JUCER_MACOS_BASE_SDK_${config}"
+    )
+    foreach(index RANGE 2)
+      list(GET old_vars ${index} old_var)
+      list(GET new_vars ${index} new_var)
+      if(DEFINED "${old_var}")
+        if(DEFINED "${new_var}")
+          message(WARNING "Both ${old_var} and ${new_var} are defined. The value of"
+            " ${old_var} (${${old_var}}) will be ignored and the value of ${new_var}"
+            " (${${new_var}}) will be used."
+          )
+        else()
+          set(${new_var} "${${old_var}}")
+        endif()
+      endif()
+    endforeach()
+  endforeach()
+
   if(IOS)
     execute_process(
       COMMAND "xcrun" "--sdk" "iphoneos" "--show-sdk-path"
@@ -2221,7 +2351,7 @@ function(jucer_project_end)
     endif()
   elseif(APPLE)
     foreach(config IN LISTS JUCER_PROJECT_CONFIGURATIONS)
-      set(sdk_version "${JUCER_OSX_BASE_SDK_VERSION_${config}}")
+      set(sdk_version "${JUCER_MACOS_BASE_SDK_${config}}")
       execute_process(
         COMMAND "xcrun" "--sdk" "macosx${sdk_version}" "--show-sdk-path"
         OUTPUT_VARIABLE sdk_path
@@ -2808,7 +2938,7 @@ function(jucer_project_end)
           set(aax_libcpp "_libcpp")
           if(DEFINED JUCER_VERSION AND JUCER_VERSION VERSION_LESS 5.3.2
               AND NOT (JUCER_CXX_LIBRARY_${config} STREQUAL "libc++"
-                       OR JUCER_OSX_DEPLOYMENT_TARGET_${config} VERSION_GREATER 10.8))
+                       OR JUCER_MACOS_DEPLOYMENT_TARGET_${config} VERSION_GREATER 10.8))
             set(aax_libcpp "")
           endif()
           set(aax_lib
@@ -3280,14 +3410,14 @@ function(_FRUT_add_Rez_command_to_AU_plugin au_target)
   set(all_confs_sysroot "")
   set(all_confs_include_audio_unit_headers "")
   foreach(config IN LISTS JUCER_PROJECT_CONFIGURATIONS)
-    foreach(osx_architecture IN LISTS JUCER_OSX_ARCHITECTURES_${config})
+    foreach(macos_architecture IN LISTS JUCER_MACOS_ARCHITECTURES_${config})
       list(APPEND rez_defines
         "$<$<CONFIG:${config}>:-d>"
-        "$<$<CONFIG:${config}>:${osx_architecture}_YES>"
+        "$<$<CONFIG:${config}>:${macos_architecture}_YES>"
       )
       list(APPEND rez_archs
         "$<$<CONFIG:${config}>:-arch>"
-        "$<$<CONFIG:${config}>:${osx_architecture}>"
+        "$<$<CONFIG:${config}>:${macos_architecture}>"
       )
     endforeach()
 
@@ -3425,6 +3555,12 @@ endfunction()
 
 function(_FRUT_char_literal value out_char_literal)
 
+  if(ARGC GREATER 2)
+    if(NOT ARGV2 STREQUAL "WITH_COMMENT")
+      message(FATAL_ERROR "Unexpected argument \"${ARGV2}\"")
+    endif()
+  endif()
+
   set(all_ascii_codes "")
   foreach(ascii_code RANGE 1 127)
     list(APPEND all_ascii_codes ${ascii_code})
@@ -3454,7 +3590,11 @@ function(_FRUT_char_literal value out_char_literal)
 
   _FRUT_dec_to_hex("${dec_value}" hex_value)
 
-  set(${out_char_literal} "${hex_value} // '${four_chars}'" PARENT_SCOPE)
+  if(ARGV2 STREQUAL "WITH_COMMENT")
+    set(${out_char_literal} "${hex_value} // '${four_chars}'" PARENT_SCOPE)
+  else()
+    set(${out_char_literal} "${hex_value}" PARENT_SCOPE)
+  endif()
 
 endfunction()
 
@@ -3784,7 +3924,7 @@ function(_FRUT_generate_AppConfig_and_JucePluginDefines_header)
   elseif(JUCER_PROJECT_TYPE STREQUAL "Audio Plug-in")
     set(is_standalone_application 0)
 
-    _FRUT_get_audio_plugin_flags(audio_plugin_flags)
+    _FRUT_get_audio_plugin_flags(audio_plugin_flags WITH_COMMENTS)
 
     string(CONCAT audio_plugin_settings_defines
       "\n"
@@ -4676,6 +4816,12 @@ endfunction()
 
 function(_FRUT_get_audio_plugin_flags out_var)
 
+  if(ARGC GREATER 1)
+    if(NOT ARGV1 STREQUAL "WITH_COMMENTS")
+      message(FATAL_ERROR "Unexpected argument \"${ARGV1}\"")
+    endif()
+  endif()
+
   # See Project::getAudioPluginFlags()
   # in JUCE/extras/Projucer/Source/Project/jucer_Project.cpp
 
@@ -4750,8 +4896,15 @@ function(_FRUT_get_audio_plugin_flags out_var)
   set(ManufacturerWebsite_value "\"${JUCER_COMPANY_WEBSITE}\"")
   set(ManufacturerEmail_value "\"${JUCER_COMPANY_EMAIL}\"")
 
-  _FRUT_char_literal("${JUCER_PLUGIN_MANUFACTURER_CODE}" ManufacturerCode_value)
-  _FRUT_char_literal("${JUCER_PLUGIN_CODE}" PluginCode_value)
+  if(ARGV1 STREQUAL "WITH_COMMENTS")
+    _FRUT_char_literal(
+      "${JUCER_PLUGIN_MANUFACTURER_CODE}" ManufacturerCode_value WITH_COMMENT
+    )
+    _FRUT_char_literal("${JUCER_PLUGIN_CODE}" PluginCode_value WITH_COMMENT)
+  else()
+    _FRUT_char_literal("${JUCER_PLUGIN_MANUFACTURER_CODE}" ManufacturerCode_value)
+    _FRUT_char_literal("${JUCER_PLUGIN_CODE}" PluginCode_value)
+  endif()
 
   _FRUT_bool_to_int("${JUCER_PLUGIN_IS_A_SYNTH}" IsSynth_value)
   _FRUT_bool_to_int("${JUCER_PLUGIN_MIDI_INPUT}" WantsMidiInput_value)
@@ -4880,7 +5033,11 @@ function(_FRUT_get_audio_plugin_flags out_var)
   _FRUT_bool_to_int("${JUCER_PLUGIN_AAX_DISABLE_MULTI_MONO}" AAXDisableMultiMono_value)
 
   _FRUT_get_iaa_type_code(iaa_type_code)
-  _FRUT_char_literal("${iaa_type_code}" IAAType_value)
+  if(ARGV1 STREQUAL "WITH_COMMENTS")
+    _FRUT_char_literal("${iaa_type_code}" IAAType_value WITH_COMMENT)
+  else()
+    _FRUT_char_literal("${iaa_type_code}" IAAType_value)
+  endif()
   set(IAASubType_value "JucePlugin_PluginCode")
   set(IAAName_value "\"${JUCER_PLUGIN_MANUFACTURER}: ${JUCER_PLUGIN_NAME}\"")
 
@@ -4990,7 +5147,7 @@ endfunction()
 
 function(_FRUT_install_to_plugin_binary_location target plugin_type default_destination)
 
-  if(DEFINED ARGV3)
+  if(ARGC GREATER 3)
     if(NOT ARGV3 STREQUAL "FILES")
       message(FATAL_ERROR "Unexpected argument \"${ARGV3}\"")
     endif()
@@ -5083,7 +5240,7 @@ function(_FRUT_link_xcode_frameworks target exporter)
     else()
       foreach(config IN LISTS JUCER_PROJECT_CONFIGURATIONS)
         set(CMAKE_FRAMEWORK_PATH "")
-        set(sdk_version "${JUCER_OSX_BASE_SDK_VERSION_${config}}")
+        set(sdk_version "${JUCER_MACOS_BASE_SDK_${config}}")
         set(sdk_path "${JUCER_MACOSX_SDK_PATH_${config}}")
         if(IS_DIRECTORY "${sdk_path}")
           set(CMAKE_FRAMEWORK_PATH "${sdk_path}/System/Library/Frameworks")
@@ -5433,10 +5590,10 @@ function(_FRUT_set_compiler_and_linker_settings target target_type exporter)
         if(APPLE)
           if(CMAKE_GENERATOR STREQUAL "Xcode")
             set(arch "\${CURRENT_ARCH}")
-          elseif(DEFINED JUCER_OSX_ARCHITECTURES_${config})
-            list(LENGTH JUCER_OSX_ARCHITECTURES_${config} osx_architectures_length)
-            if(osx_architectures_length EQUAL 1)
-              set(arch "${JUCER_OSX_ARCHITECTURES_${config}}")
+          elseif(DEFINED JUCER_MACOS_ARCHITECTURES_${config})
+            list(LENGTH JUCER_MACOS_ARCHITECTURES_${config} macos_architectures_length)
+            if(macos_architectures_length EQUAL 1)
+              set(arch "${JUCER_MACOS_ARCHITECTURES_${config}}")
             endif()
           endif()
         elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux" OR (WIN32 AND NOT MSVC))
@@ -5580,10 +5737,10 @@ function(_FRUT_set_compiler_and_linker_settings_APPLE target)
       endforeach()
     else()
       foreach(config IN LISTS JUCER_PROJECT_CONFIGURATIONS)
-        if(DEFINED JUCER_OSX_ARCHITECTURES_${config})
+        if(DEFINED JUCER_MACOS_ARCHITECTURES_${config})
           string(TOUPPER "${config}" upper_config)
           set_target_properties(${target} PROPERTIES
-            OSX_ARCHITECTURES_${upper_config} "${JUCER_OSX_ARCHITECTURES_${config}}"
+            OSX_ARCHITECTURES_${upper_config} "${JUCER_MACOS_ARCHITECTURES_${config}}"
           )
         endif()
       endforeach()
@@ -5600,11 +5757,14 @@ function(_FRUT_set_compiler_and_linker_settings_APPLE target)
     set_target_properties(${target} PROPERTIES
       XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon"
       XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME "LaunchImage"
-      XCODE_ATTRIBUTE_SDKROOT "iphoneos"
       XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "${targeted_device_family}"
     )
 
     foreach(config IN LISTS JUCER_PROJECT_CONFIGURATIONS)
+      set_target_properties(${target} PROPERTIES
+        XCODE_ATTRIBUTE_SDKROOT[variant=${config}]
+        "iphoneos${JUCER_IOS_BASE_SDK_${config}}"
+      )
       if(DEFINED JUCER_IOS_DEPLOYMENT_TARGET_${config}
           AND NOT JUCER_IOS_DEPLOYMENT_TARGET_${config} STREQUAL "default")
         set(ios_deployment_target "${JUCER_IOS_DEPLOYMENT_TARGET_${config}}")
@@ -5618,41 +5778,49 @@ function(_FRUT_set_compiler_and_linker_settings_APPLE target)
     endforeach()
   elseif(CMAKE_GENERATOR STREQUAL "Xcode")
     foreach(config IN LISTS JUCER_PROJECT_CONFIGURATIONS)
-      set(osx_deployment_target "10.11")
-      if(DEFINED JUCER_OSX_DEPLOYMENT_TARGET_${config})
-        set(osx_deployment_target "${JUCER_OSX_DEPLOYMENT_TARGET_${config}}")
+      set(macos_deployment_target "10.11")
+      if(DEFINED JUCER_MACOS_DEPLOYMENT_TARGET_${config})
+        set(macos_deployment_target "${JUCER_MACOS_DEPLOYMENT_TARGET_${config}}")
       endif()
       if(target MATCHES "_AUv3_AppExtension$"
-          AND osx_deployment_target VERSION_LESS 10.11)
-        set(osx_deployment_target "10.11")
-        message(STATUS "Set OSX Deployment Target to 10.11 for ${target} in ${config}")
+          AND macos_deployment_target VERSION_LESS 10.11)
+        set(macos_deployment_target "10.11")
+        message(STATUS "Set macOS Deployment Target to 10.11 for ${target} in ${config}")
       endif()
       set_target_properties(${target} PROPERTIES
         XCODE_ATTRIBUTE_MACOSX_DEPLOYMENT_TARGET[variant=${config}]
-        "${osx_deployment_target}"
+        "${macos_deployment_target}"
       )
 
-      if(DEFINED JUCER_OSX_BASE_SDK_VERSION_${config})
+      unset(sdkroot)
+      if(DEFINED JUCER_VERSION AND JUCER_VERSION VERSION_LESS 5.4.6)
+        if(DEFINED JUCER_MACOS_BASE_SDK_${config})
+          set(sdkroot "macosx${JUCER_MACOS_BASE_SDK_${config}}")
+        endif()
+      else()
+        set(sdkroot "macosx${JUCER_MACOS_BASE_SDK_${config}}")
+      endif()
+      if(DEFINED sdkroot)
         set_target_properties(${target} PROPERTIES
-          XCODE_ATTRIBUTE_SDKROOT[variant=${config}]
-          "macosx${JUCER_OSX_BASE_SDK_VERSION_${config}}"
+          XCODE_ATTRIBUTE_SDKROOT[variant=${config}] "${sdkroot}"
         )
       endif()
     endforeach()
   else()
-    set(osx_deployment_target "10.11")
-    if(DEFINED JUCER_OSX_DEPLOYMENT_TARGET_${CMAKE_BUILD_TYPE})
-      set(osx_deployment_target "${JUCER_OSX_DEPLOYMENT_TARGET_${CMAKE_BUILD_TYPE}}")
+    set(macos_deployment_target "10.11")
+    if(DEFINED JUCER_MACOS_DEPLOYMENT_TARGET_${CMAKE_BUILD_TYPE})
+      set(macos_deployment_target "${JUCER_MACOS_DEPLOYMENT_TARGET_${CMAKE_BUILD_TYPE}}")
     endif()
-    if(target MATCHES "_AUv3_AppExtension$" AND osx_deployment_target VERSION_LESS 10.11)
-      set(osx_deployment_target "10.11")
-      message(STATUS "Set OSX Deployment Target to 10.11 for ${target}")
+    if(target MATCHES "_AUv3_AppExtension$"
+        AND macos_deployment_target VERSION_LESS 10.11)
+      set(macos_deployment_target "10.11")
+      message(STATUS "Set macOS Deployment Target to 10.11 for ${target}")
     endif()
     target_compile_options(${target} PRIVATE
-      "-mmacosx-version-min=${osx_deployment_target}"
+      "-mmacosx-version-min=${macos_deployment_target}"
     )
     set_property(TARGET ${target} APPEND_STRING PROPERTY
-      LINK_FLAGS " -mmacosx-version-min=${osx_deployment_target}"
+      LINK_FLAGS " -mmacosx-version-min=${macos_deployment_target}"
     )
 
     set(sysroot "${JUCER_MACOSX_SDK_PATH_${CMAKE_BUILD_TYPE}}")
@@ -5788,6 +5956,10 @@ function(_FRUT_set_compiler_and_linker_settings_APPLE target)
 
   foreach(xcode_lib IN LISTS JUCER_PROJECT_XCODE_LIBS)
     target_link_libraries(${target} PRIVATE "-l${xcode_lib}")
+  endforeach()
+
+  foreach(framework_name IN LISTS JUCER_PROJECT_XCODE_WEAK_FRAMEWORKS)
+    target_link_libraries(${target} PRIVATE "-weak_framework ${framework_name}")
   endforeach()
 
 endfunction()
@@ -6379,7 +6551,7 @@ endfunction()
 
 function(_FRUT_set_output_name_properties target)
 
-  if(DEFINED ARGV1)
+  if(ARGC GREATER 1)
     if(NOT ARGV1 STREQUAL "ADD_lib_PREFIX")
       message(FATAL_ERROR "Unexpected argument \"${ARGV1}\"")
     endif()

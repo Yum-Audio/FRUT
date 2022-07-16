@@ -21,14 +21,14 @@ get_filename_component(Projucer_jucer_FILE
 
 jucer_project_begin(
   JUCER_FORMAT_VERSION "1"
-  JUCER_VERSION "6.0.5"
+  JUCER_VERSION "7.0.0"
   PROJECT_FILE "${Projucer_jucer_FILE}"
   PROJECT_ID "M70qfTRRk"
 )
 
 jucer_project_settings(
   PROJECT_NAME "Projucer"
-  PROJECT_VERSION "6.0.5"
+  PROJECT_VERSION "7.0.0"
   COMPANY_NAME "Raw Material Software Limited"
   COMPANY_COPYRIGHT "Raw Material Software Limited"
   USE_GLOBAL_APPCONFIG_HEADER OFF
@@ -38,7 +38,7 @@ jucer_project_settings(
   SPLASH_SCREEN_COLOUR "Dark"
   PROJECT_TYPE "GUI Application"
   BUNDLE_IDENTIFIER "com.juce.theprojucer"
-  CXX_LANGUAGE_STANDARD "C++11"
+  CXX_LANGUAGE_STANDARD "C++14"
 )
 
 jucer_project_files("Projucer/Application/StartPage"
@@ -95,8 +95,10 @@ jucer_project_files("Projucer/Application"
 jucer_project_files("Projucer/BinaryData"
 # Compile   Xcode     Binary    File
 #           Resource  Resource
+  .         .         x         "../Build/CMake/JuceLV2Defines.h.in"
   .         .         x         "../Build/CMake/LaunchScreen.storyboard"
   .         .         x         "../Build/CMake/PIPAudioProcessor.cpp.in"
+  .         .         x         "../Build/CMake/PIPAudioProcessorWithARA.cpp.in"
   .         .         x         "../Build/CMake/PIPComponent.cpp.in"
   .         .         x         "../Build/CMake/PIPConsole.cpp.in"
   .         .         x         "../Build/CMake/RecentFilesMenuTemplate.nib"
@@ -117,13 +119,11 @@ jucer_project_files("Projucer/BinaryData/Icons"
 #           Resource  Resource
   .         .         x         "Source/BinaryData/Icons/background_logo.svg"
   .         .         x         "Source/BinaryData/Icons/export_android.svg"
-  .         .         x         "Source/BinaryData/Icons/export_clion.svg"
   .         .         x         "Source/BinaryData/Icons/export_codeBlocks.svg"
   .         .         x         "Source/BinaryData/Icons/export_linux.svg"
   .         .         x         "Source/BinaryData/Icons/export_visualStudio.svg"
   .         .         x         "Source/BinaryData/Icons/export_xcode.svg"
   .         .         x         "Source/BinaryData/Icons/gpl_logo.svg"
-  .         .         x         "Source/BinaryData/Icons/juce-logo-with-text.svg"
   .         .         x         "Source/BinaryData/Icons/juce_icon.png"
   .         .         x         "Source/BinaryData/Icons/wizard_AnimatedApp.svg"
   .         .         x         "Source/BinaryData/Icons/wizard_AudioApp.svg"
@@ -146,6 +146,10 @@ jucer_project_files("Projucer/BinaryData/Templates"
   .         .         x         "Source/BinaryData/Templates/jucer_AudioComponentSimpleTemplate.h"
   .         .         x         "Source/BinaryData/Templates/jucer_AudioComponentTemplate.cpp"
   .         .         x         "Source/BinaryData/Templates/jucer_AudioComponentTemplate.h"
+  .         .         x         "Source/BinaryData/Templates/jucer_AudioPluginARADocumentControllerTemplate.cpp"
+  .         .         x         "Source/BinaryData/Templates/jucer_AudioPluginARADocumentControllerTemplate.h"
+  .         .         x         "Source/BinaryData/Templates/jucer_AudioPluginARAPlaybackRendererTemplate.cpp"
+  .         .         x         "Source/BinaryData/Templates/jucer_AudioPluginARAPlaybackRendererTemplate.h"
   .         .         x         "Source/BinaryData/Templates/jucer_AudioPluginEditorTemplate.cpp"
   .         .         x         "Source/BinaryData/Templates/jucer_AudioPluginEditorTemplate.h"
   .         .         x         "Source/BinaryData/Templates/jucer_AudioPluginFilterTemplate.cpp"
@@ -185,7 +189,6 @@ jucer_project_files("Projucer/CodeEditor"
   x         .         .         "Source/CodeEditor/jucer_DocumentEditorComponent.cpp"
   .         .         .         "Source/CodeEditor/jucer_DocumentEditorComponent.h"
   .         .         .         "Source/CodeEditor/jucer_ItemPreviewComponent.h"
-  .         .         .         "Source/CodeEditor/jucer_LiveBuildCodeEditor.h"
   x         .         .         "Source/CodeEditor/jucer_OpenDocumentManager.cpp"
   .         .         .         "Source/CodeEditor/jucer_OpenDocumentManager.h"
   x         .         .         "Source/CodeEditor/jucer_SourceCodeEditor.cpp"
@@ -308,38 +311,6 @@ jucer_project_files("Projucer/ComponentEditor"
   .         .         .         "Source/ComponentEditor/jucer_UtilityFunctions.h"
 )
 
-jucer_project_files("Projucer/LiveBuildEngine/UI"
-# Compile   Xcode     Binary    File
-#           Resource  Resource
-  .         .         .         "Source/LiveBuildEngine/UI/jucer_ActivityListComponent.h"
-  .         .         .         "Source/LiveBuildEngine/UI/jucer_BuildTabStatusComponent.h"
-  .         .         .         "Source/LiveBuildEngine/UI/jucer_ComponentListComponent.h"
-  .         .         .         "Source/LiveBuildEngine/UI/jucer_ErrorListComponent.h"
-)
-
-jucer_project_files("Projucer/LiveBuildEngine"
-# Compile   Xcode     Binary    File
-#           Resource  Resource
-  .         .         .         "Source/LiveBuildEngine/jucer_ActivityList.h"
-  .         .         .         "Source/LiveBuildEngine/jucer_ClassDatabase.h"
-  .         .         .         "Source/LiveBuildEngine/jucer_ClientServerMessages.h"
-  x         .         .         "Source/LiveBuildEngine/jucer_CompileEngineClient.cpp"
-  .         .         .         "Source/LiveBuildEngine/jucer_CompileEngineClient.h"
-  .         .         .         "Source/LiveBuildEngine/jucer_CompileEngineDLL.h"
-  x         .         .         "Source/LiveBuildEngine/jucer_CompileEngineServer.cpp"
-  .         .         .         "Source/LiveBuildEngine/jucer_CompileEngineServer.h"
-  .         .         .         "Source/LiveBuildEngine/jucer_CompileEngineSettings.h"
-  .         .         .         "Source/LiveBuildEngine/jucer_CppHelpers.h"
-  .         .         .         "Source/LiveBuildEngine/jucer_DiagnosticMessage.h"
-  x         .         .         "Source/LiveBuildEngine/jucer_DownloadCompileEngineThread.cpp"
-  .         .         .         "Source/LiveBuildEngine/jucer_DownloadCompileEngineThread.h"
-  .         .         .         "Source/LiveBuildEngine/jucer_ErrorList.h"
-  .         .         .         "Source/LiveBuildEngine/jucer_LiveCodeBuilderDLL.h"
-  .         .         .         "Source/LiveBuildEngine/jucer_MessageIDs.h"
-  .         .         .         "Source/LiveBuildEngine/jucer_ProjectBuildInfo.h"
-  .         .         .         "Source/LiveBuildEngine/jucer_SourceCodeRange.h"
-)
-
 jucer_project_files("Projucer/Project/Modules"
 # Compile   Xcode     Binary    File
 #           Resource  Resource
@@ -354,11 +325,9 @@ jucer_project_files("Projucer/Project/UI/Sidebar"
 #           Resource  Resource
   .         .         .         "Source/Project/UI/Sidebar/jucer_ExporterTreeItems.h"
   .         .         .         "Source/Project/UI/Sidebar/jucer_FileTreeItems.h"
-  .         .         .         "Source/Project/UI/Sidebar/jucer_LiveBuildTab.h"
   .         .         .         "Source/Project/UI/Sidebar/jucer_ModuleTreeItems.h"
-  .         .         .         "Source/Project/UI/Sidebar/jucer_ProjectTab.h"
   .         .         .         "Source/Project/UI/Sidebar/jucer_ProjectTreeItemBase.h"
-  .         .         .         "Source/Project/UI/Sidebar/jucer_TabComponents.h"
+  .         .         .         "Source/Project/UI/Sidebar/jucer_Sidebar.h"
   .         .         .         "Source/Project/UI/Sidebar/jucer_TreeItemTypes.h"
 )
 
@@ -387,7 +356,6 @@ jucer_project_files("Projucer/ProjectSaving"
 # Compile   Xcode     Binary    File
 #           Resource  Resource
   .         .         .         "Source/ProjectSaving/jucer_ProjectExport_Android.h"
-  .         .         .         "Source/ProjectSaving/jucer_ProjectExport_CLion.h"
   .         .         .         "Source/ProjectSaving/jucer_ProjectExport_CodeBlocks.h"
   .         .         .         "Source/ProjectSaving/jucer_ProjectExport_Make.h"
   .         .         .         "Source/ProjectSaving/jucer_ProjectExport_MSVC.h"
@@ -425,7 +393,6 @@ jucer_project_files("Projucer/Utility/Helpers"
   .         .         .         "Source/Utility/Helpers/jucer_PresetIDs.h"
   .         .         .         "Source/Utility/Helpers/jucer_TranslationHelpers.h"
   .         .         .         "Source/Utility/Helpers/jucer_ValueSourceHelpers.h"
-  .         .         .         "Source/Utility/Helpers/jucer_ValueWithDefaultWrapper.h"
   x         .         .         "Source/Utility/Helpers/jucer_VersionInfo.cpp"
   .         .         .         "Source/Utility/Helpers/jucer_VersionInfo.h"
 )
@@ -554,6 +521,7 @@ jucer_export_target_configuration(
   DEBUG_MODE ON
   BINARY_NAME "Projucer"
   ADD_RECOMMENDED_COMPILER_WARNING_FLAGS "Enabled"
+  MACOS_DEPLOYMENT_TARGET "10.12"
   CXX_LIBRARY "LLVM libc++"
 )
 
@@ -564,34 +532,8 @@ jucer_export_target_configuration(
   BINARY_NAME "Projucer"
   LINK_TIME_OPTIMISATION OFF
   ADD_RECOMMENDED_COMPILER_WARNING_FLAGS "Enabled"
+  MACOS_DEPLOYMENT_TARGET "10.12"
   CXX_LIBRARY "LLVM libc++"
-)
-
-jucer_export_target(
-  "Visual Studio 2015"
-  EXTRA_COMPILER_FLAGS
-    "/bigobj"
-  ICON_SMALL "Source/BinaryData/Icons/juce_icon.png"
-  ICON_LARGE "Source/BinaryData/Icons/juce_icon.png"
-)
-
-jucer_export_target_configuration(
-  "Visual Studio 2015"
-  NAME "Debug"
-  DEBUG_MODE ON
-  BINARY_NAME "Projucer"
-  RUNTIME_LIBRARY "Use DLL runtime"
-  DEBUG_INFORMATION_FORMAT "Program Database (/Zi)"
-)
-
-jucer_export_target_configuration(
-  "Visual Studio 2015"
-  NAME "Release"
-  DEBUG_MODE OFF
-  BINARY_NAME "Projucer"
-  LINK_TIME_OPTIMISATION OFF
-  RUNTIME_LIBRARY "Use static runtime"
-  DEBUG_INFORMATION_FORMAT "None"
 )
 
 jucer_export_target(
@@ -643,6 +585,35 @@ jucer_export_target_configuration(
 
 jucer_export_target_configuration(
   "Visual Studio 2019"
+  NAME "Release"
+  DEBUG_MODE OFF
+  BINARY_NAME "Projucer"
+  LINK_TIME_OPTIMISATION OFF
+  OPTIMISATION "Maximise speed"
+  RUNTIME_LIBRARY "Use static runtime"
+  DEBUG_INFORMATION_FORMAT "None"
+)
+
+jucer_export_target(
+  "Visual Studio 2022"
+  EXTRA_COMPILER_FLAGS
+    "/w44265"
+    "/w45038"
+    "/w44062"
+  ICON_SMALL "Source/BinaryData/Icons/juce_icon.png"
+  ICON_LARGE "Source/BinaryData/Icons/juce_icon.png"
+)
+
+jucer_export_target_configuration(
+  "Visual Studio 2022"
+  NAME "Debug"
+  DEBUG_MODE ON
+  BINARY_NAME "Projucer"
+  RUNTIME_LIBRARY "Use static runtime"
+)
+
+jucer_export_target_configuration(
+  "Visual Studio 2022"
   NAME "Release"
   DEBUG_MODE OFF
   BINARY_NAME "Projucer"
