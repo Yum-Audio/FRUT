@@ -21,19 +21,18 @@ get_filename_component(Projucer_jucer_FILE
 
 jucer_project_begin(
   JUCER_FORMAT_VERSION "1"
-  JUCER_VERSION "7.0.0"
+  JUCER_VERSION "7.0.1"
   PROJECT_FILE "${Projucer_jucer_FILE}"
   PROJECT_ID "M70qfTRRk"
 )
 
 jucer_project_settings(
   PROJECT_NAME "Projucer"
-  PROJECT_VERSION "7.0.0"
+  PROJECT_VERSION "7.0.1"
   COMPANY_NAME "Raw Material Software Limited"
   COMPANY_COPYRIGHT "Raw Material Software Limited"
   USE_GLOBAL_APPCONFIG_HEADER OFF
   ADD_USING_NAMESPACE_JUCE_TO_JUCE_HEADER ON
-  REPORT_JUCE_APP_USAGE OFF # Required for closed source applications without an Indie or Pro JUCE license
   DISPLAY_THE_JUCE_SPLASH_SCREEN OFF # Required for closed source applications without an Indie or Pro JUCE license
   SPLASH_SCREEN_COLOUR "Dark"
   PROJECT_TYPE "GUI Application"

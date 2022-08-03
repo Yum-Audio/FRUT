@@ -21,21 +21,20 @@ get_filename_component(DemoRunner_jucer_FILE
 
 jucer_project_begin(
   JUCER_FORMAT_VERSION "1"
-  JUCER_VERSION "7.0.0"
+  JUCER_VERSION "7.0.1"
   PROJECT_FILE "${DemoRunner_jucer_FILE}"
   PROJECT_ID "yj7xMM"
 )
 
 jucer_project_settings(
   PROJECT_NAME "DemoRunner"
-  PROJECT_VERSION "7.0.0"
+  PROJECT_VERSION "7.0.1"
   COMPANY_NAME "Raw Material Software Limited"
   COMPANY_COPYRIGHT "Copyright (c) 2020 - Raw Material Software Limited"
   COMPANY_WEBSITE "https://www.juce.com/"
   COMPANY_EMAIL "info@juce.com"
   USE_GLOBAL_APPCONFIG_HEADER OFF
   ADD_USING_NAMESPACE_JUCE_TO_JUCE_HEADER ON
-  REPORT_JUCE_APP_USAGE OFF # Required for closed source applications without an Indie or Pro JUCE license
   DISPLAY_THE_JUCE_SPLASH_SCREEN ON # Required for closed source applications without an Indie or Pro JUCE license
   PROJECT_TYPE "GUI Application"
   BUNDLE_IDENTIFIER "com.rmsl.jucedemorunner"
