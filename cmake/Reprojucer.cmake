@@ -772,6 +772,7 @@ function(jucer_export_target exporter)
 
   if(exporter STREQUAL "Xcode (macOS)" OR exporter STREQUAL "Xcode (iOS)")
     list(APPEND single_value_keywords
+      "USE_LEGACY_BUILD_SYSTEM"
       "MICROPHONE_ACCESS"
       "MICROPHONE_ACCESS_TEXT"
       "CAMERA_ACCESS"
@@ -783,6 +784,7 @@ function(jucer_export_target exporter)
       "CUSTOM_PLIST"
       "PLIST_PREPROCESS"
       "PLIST_PREFIX_HEADER"
+      "SUPPRESS_AUDIOUNIT_PLIST_RESOURCE_USAGE_KEY"
       "PREBUILD_SHELL_SCRIPT"
       "POSTBUILD_SHELL_SCRIPT"
       "EXPORTER_BUNDLE_IDENTIFIER"
@@ -812,11 +814,14 @@ function(jucer_export_target exporter)
       "RTAS_SDK_FOLDER"
       "USE_APP_SANDBOX"
       "APP_SANDBOX_INHERITANCE"
-      "APP_SANDBOX_OPTIONS"
       "USE_HARDENED_RUNTIME"
-      "HARDENED_RUNTIME_OPTIONS"
       "SEND_APPLE_EVENTS"
       "SEND_APPLE_EVENTS_TEXT"
+    )
+    list(APPEND multi_value_keywords
+      "VALID_ARCHITECTURES"
+      "APP_SANDBOX_OPTIONS"
+      "HARDENED_RUNTIME_OPTIONS"
     )
 
     if(JUCER_PROJECT_TYPE STREQUAL "GUI Application")
@@ -832,6 +837,7 @@ function(jucer_export_target exporter)
       "FILE_SHARING_ENABLED"
       "SUPPORT_DOCUMENT_BROWSER"
       "STATUS_BAR_HIDDEN"
+      "REQUIRES_FULL_SCREEN"
       "CONTENT_SHARING"
       "AUDIO_BACKGROUND_CAPABILITY"
       "BLUETOOTH_MIDI_BACKGROUND_CAPABILITY"
@@ -855,6 +861,8 @@ function(jucer_export_target exporter)
       "MANIFEST_FILE"
       "PLATFORM_TOOLSET"
       "USE_IPP_LIBRARY"
+      "USE_IPP_LIBRARY_ONE_API"
+      "USE_MKL_LIBRARY_ONE_API"
       "WINDOWS_TARGET_PLATFORM"
     )
 
@@ -1104,8 +1112,29 @@ function(jucer_export_target exporter)
     set(JUCER_STATUS_BAR_HIDDEN "${_STATUS_BAR_HIDDEN}" PARENT_SCOPE)
   endif()
 
+  if(DEFINED _REQUIRES_FULL_SCREEN)
+    set(JUCER_REQUIRES_FULL_SCREEN "${_REQUIRES_FULL_SCREEN}" PARENT_SCOPE)
+  endif()
+
   if(DEFINED _DOCUMENT_FILE_EXTENSIONS)
     set(JUCER_DOCUMENT_FILE_EXTENSIONS "${_DOCUMENT_FILE_EXTENSIONS}" PARENT_SCOPE)
+  endif()
+
+  if(DEFINED _USE_LEGACY_BUILD_SYSTEM)
+    if(CMAKE_GENERATOR STREQUAL "Xcode")
+      _FRUT_warn_about_unsupported_setting(
+        "USE_LEGACY_BUILD_SYSTEM" "Use Legacy Build System" 738
+      )
+    endif()
+  endif()
+
+  if(DEFINED _VALID_ARCHITECTURES)
+    if(NOT CMAKE_GENERATOR STREQUAL "Xcode")
+      message(WARNING "VALID_ARCHITECTURES is only supported when using the Xcode"
+        " generator. You can call `cmake -G Xcode` to do so."
+      )
+    endif()
+    set(JUCER_VALID_ARCHITECTURES "${_VALID_ARCHITECTURES}" PARENT_SCOPE)
   endif()
 
   if(DEFINED _USE_APP_SANDBOX)
@@ -1371,6 +1400,12 @@ function(jucer_export_target exporter)
     set(JUCER_PLIST_PREFIX_HEADER "${prefix_header}" PARENT_SCOPE)
   endif()
 
+  if(DEFINED _SUPPRESS_AUDIOUNIT_PLIST_RESOURCE_USAGE_KEY)
+    set(JUCER_SUPPRESS_AUDIOUNIT_PLIST_RESOURCE_USAGE_KEY
+      "${_SUPPRESS_AUDIOUNIT_PLIST_RESOURCE_USAGE_KEY}" PARENT_SCOPE
+    )
+  endif()
+
   if(DEFINED _EXTRA_SYSTEM_FRAMEWORKS)
     set(JUCER_EXTRA_SYSTEM_FRAMEWORKS "${_EXTRA_SYSTEM_FRAMEWORKS}" PARENT_SCOPE)
   endif()
@@ -1487,6 +1522,18 @@ function(jucer_export_target exporter)
     endif()
   endif()
 
+  if(DEFINED _USE_IPP_LIBRARY_ONE_API)
+    _FRUT_warn_about_unsupported_setting(
+      "USE_IPP_LIBRARY_ONE_API" "Use IPP Library (oneAPI)" 739
+    )
+  endif()
+
+  if(DEFINED _USE_MKL_LIBRARY_ONE_API)
+    _FRUT_warn_about_unsupported_setting(
+      "USE_MKL_LIBRARY_ONE_API" "Use MKL Library (oneAPI)" 740
+    )
+  endif()
+
   if(DEFINED _WINDOWS_TARGET_PLATFORM)
     set(platform "${_WINDOWS_TARGET_PLATFORM}")
     if(NOT platform STREQUAL CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION)
@@ -1598,6 +1645,8 @@ function(jucer_export_target_configuration
 
   if(exporter STREQUAL "Xcode (macOS)" OR exporter STREQUAL "Xcode (iOS)")
     list(APPEND single_value_keywords
+      "USE_PRECOMPILED_HEADER"
+      "PRECOMPILED_HEADER_FILE"
       "ENABLE_PLUGIN_COPY_STEP"
       "VST_BINARY_LOCATION"
       "VST3_BINARY_LOCATION"
@@ -1636,6 +1685,8 @@ function(jucer_export_target_configuration
 
   if(exporter MATCHES "^Visual Studio 20(22|1[9753])$")
     list(APPEND single_value_keywords
+      "USE_PRECOMPILED_HEADER"
+      "PRECOMPILED_HEADER_FILE"
       "ENABLE_PLUGIN_COPY_STEP"
       "VST_BINARY_LOCATION"
       "VST3_BINARY_LOCATION"
@@ -1769,6 +1820,16 @@ function(jucer_export_target_configuration
       endif()
     endif()
     set(JUCER_OPTIMISATION_FLAG_${config} "${optimisation_flag}" PARENT_SCOPE)
+  endif()
+
+  if(DEFINED _USE_PRECOMPILED_HEADER)
+    _FRUT_warn_about_unsupported_setting(
+      "USE_PRECOMPILED_HEADER" "Use Precompiled Header" 737
+    )
+  endif()
+
+  if(DEFINED _PRECOMPILED_HEADER_FILE)
+    # TODO with USE_PRECOMPILED_HEADER
   endif()
 
   if(DEFINED _ENABLE_PLUGIN_COPY_STEP)
@@ -4352,11 +4413,18 @@ function(_FRUT_generate_plist_file
     <true/>"
     )
 
-    if(NOT target MATCHES "_AUv3_AppExtension$")
-      string(APPEND plist_entries "
+    if(DEFINED JUCER_VERSION AND JUCER_VERSION VERSION_LESS 6.0.8)
+      if(NOT target MATCHES "_AUv3_AppExtension$")
+        string(APPEND plist_entries "
     <key>UIViewControllerBasedStatusBarAppearance</key>
     <false/>"
-      )
+        )
+      endif()
+    else()
+      string(APPEND plist_entries "
+    <key>UIViewControllerBasedStatusBarAppearance</key>
+    <true/>"
+       )
     endif()
 
     if(
@@ -4484,7 +4552,8 @@ function(_FRUT_generate_plist_file
     )
   endif()
 
-  if(JUCER_STATUS_BAR_HIDDEN AND NOT target MATCHES "_AUv3_AppExtension$")
+  if(DEFINED JUCER_VERSION AND JUCER_VERSION VERSION_LESS 6.0.8
+      AND JUCER_STATUS_BAR_HIDDEN AND NOT target MATCHES "_AUv3_AppExtension$")
     string(APPEND plist_entries "
     <key>UIStatusBarHidden</key>
     <true/>"
@@ -4492,15 +4561,35 @@ function(_FRUT_generate_plist_file
   endif()
 
   if(IOS AND NOT target MATCHES "_AUv3_AppExtension$")
-    string(APPEND plist_entries "
+    if(DEFINED JUCER_VERSION AND JUCER_VERSION VERSION_LESS 6.0.8)
+      string(APPEND plist_entries "
     <key>UIRequiresFullScreen</key>
     <true/>"
-    )
-    if(NOT JUCER_STATUS_BAR_HIDDEN)
-      string(APPEND plist_entries "
+      )
+      if(NOT JUCER_STATUS_BAR_HIDDEN)
+        string(APPEND plist_entries "
     <key>UIStatusBarHidden</key>
     <true/>"
-      )
+        )
+      endif()
+    else()
+      if(JUCER_STATUS_BAR_HIDDEN)
+        string(APPEND plist_entries "
+    <key>UIStatusBarHidden</key>
+    <true/>"
+        )
+      endif()
+      if(NOT DEFINED JUCER_REQUIRES_FULL_SCREEN OR JUCER_REQUIRES_FULL_SCREEN)
+        string(APPEND plist_entries "
+    <key>UIRequiresFullScreen</key>
+    <true/>"
+        )
+      else()
+        string(APPEND plist_entries "
+    <key>UIRequiresFullScreen</key>
+    <false/>"
+        )
+      endif()
     endif()
 
     set(default_screen_orientations
@@ -4613,7 +4702,8 @@ function(_FRUT_generate_plist_file
         <key>sandboxSafe</key>
         <true/>"
       )
-    elseif(NOT (DEFINED JUCER_VERSION AND JUCER_VERSION VERSION_LESS 5.4.0))
+    elseif(NOT (DEFINED JUCER_VERSION AND JUCER_VERSION VERSION_LESS 5.4.0)
+        AND NOT JUCER_SUPPRESS_AUDIOUNIT_PLIST_RESOURCE_USAGE_KEY)
       string(APPEND plist_entries "
         <key>resourceUsage</key>
         <dict>
@@ -5364,11 +5454,6 @@ function(_FRUT_set_AppConfig_compile_definitions target)
   else()
     set(display_splash_screen 1)
   endif()
-  if(DEFINED JUCER_REPORT_JUCE_APP_USAGE AND NOT JUCER_REPORT_JUCE_APP_USAGE)
-    set(report_app_usage 0)
-  else()
-    set(report_app_usage 1)
-  endif()
   if(DEFINED JUCER_SPLASH_SCREEN_COLOUR
       AND NOT JUCER_SPLASH_SCREEN_COLOUR STREQUAL "Dark")
     set(use_dark_splash_screen 0)
@@ -5377,9 +5462,19 @@ function(_FRUT_set_AppConfig_compile_definitions target)
   endif()
   target_compile_definitions(${target} PRIVATE
     "JUCE_DISPLAY_SPLASH_SCREEN=${display_splash_screen}"
-    "JUCE_REPORT_APP_USAGE=${report_app_usage}"
     "JUCE_USE_DARK_SPLASH_SCREEN=${use_dark_splash_screen}"
   )
+
+  if(DEFINED JUCER_VERSION AND JUCER_VERSION VERSION_LESS 6.0.0)
+    if(DEFINED JUCER_REPORT_JUCE_APP_USAGE AND NOT JUCER_REPORT_JUCE_APP_USAGE)
+      set(report_app_usage 0)
+    else()
+      set(report_app_usage 1)
+    endif()
+    target_compile_definitions(${target} PRIVATE
+      "JUCE_REPORT_APP_USAGE=${report_app_usage}"
+    )
+  endif()
 
   foreach(module_name IN LISTS JUCER_PROJECT_MODULES)
     target_compile_definitions(${target} PRIVATE "JUCE_MODULE_AVAILABLE_${module_name}=1")
@@ -5717,7 +5812,7 @@ function(_FRUT_set_compiler_and_linker_settings_APPLE target)
     target_compile_definitions(${target} PRIVATE "JUCE_PUSH_NOTIFICATIONS=1")
   endif()
 
-  if(target MATCHES "_AUv3_AppExtension$")
+  if(NOT IOS AND target MATCHES "_AUv3_AppExtension$")
     if(CMAKE_GENERATOR STREQUAL "Xcode")
       set_target_properties(${target} PROPERTIES
         XCODE_ATTRIBUTE_ARCHS "$(ARCHS_STANDARD_64_BIT)"
@@ -5732,6 +5827,18 @@ function(_FRUT_set_compiler_and_linker_settings_APPLE target)
           set_target_properties(${target} PROPERTIES
             XCODE_ATTRIBUTE_ARCHS[variant=${config}] "${JUCER_XCODE_ARCHS_${config}}"
           )
+        else()
+          if(NOT CMAKE_VERSION VERSION_LESS 3.18.1 AND NOT XCODE_VERSION VERSION_LESS 12)
+            set_target_properties(${target} PROPERTIES
+              XCODE_ATTRIBUTE_ARCHS[variant=${config}] "$(ARCHS_STANDARD)"
+            )
+          endif()
+
+          if(JUCER_CONFIGURATION_IS_DEBUG_${config})
+            set_target_properties(${target} PROPERTIES
+              XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH[variant=${config}] "YES"
+            )
+          endif()
         endif()
       endforeach()
     else()
@@ -5743,6 +5850,32 @@ function(_FRUT_set_compiler_and_linker_settings_APPLE target)
           )
         endif()
       endforeach()
+    endif()
+  endif()
+
+  if(NOT IOS AND NOT (DEFINED JUCER_VERSION AND JUCER_VERSION VERSION_LESS 6.0.2))
+    unset(valid_archs)
+    set(excluded_archs "")
+    if(DEFINED JUCER_VALID_ARCHITECTURES AND NOT JUCER_VALID_ARCHITECTURES STREQUAL "")
+      string(REPLACE ";" " " valid_archs "${JUCER_VALID_ARCHITECTURES}")
+      foreach(arch "i386" "x86_64" "arm64" "arm64e")
+        if(NOT arch IN_LIST JUCER_VALID_ARCHITECTURES)
+          list(APPEND excluded_archs "${arch}")
+        endif()
+      endforeach()
+      string(REPLACE ";" " " excluded_archs "${excluded_archs}")
+    elseif(NOT DEFINED JUCER_VALID_ARCHITECTURES)
+      set(valid_archs "i386 x86_64 arm64 arm64e")
+    endif()
+    if(DEFINED valid_archs)
+      set_target_properties(${target} PROPERTIES
+        XCODE_ATTRIBUTE_VALID_ARCHS "${valid_archs}"
+      )
+      if(NOT (DEFINED JUCER_VERSION AND JUCER_VERSION VERSION_LESS 6.1.3))
+        set_target_properties(${target} PROPERTIES
+          XCODE_ATTRIBUTE_EXCLUDED_ARCHS "${excluded_archs}"
+        )
+      endif()
     endif()
   endif()
 
@@ -6654,7 +6787,7 @@ function(_FRUT_warn_about_unsupported_setting setting projucer_setting issue_num
   message(WARNING "Reprojucer.cmake doesn't support the setting ${setting}"
     " (\"${projucer_setting}\" in Projucer). If you would like Reprojucer.cmake to"
     " support this setting, please write a new comment on the issue \"Reprojucer.cmake"
-    " doesn't support the setting ${setting}\" on GitHub:"
+    " doesn't support the setting `${setting}`\" on GitHub:"
     " https://github.com/McMartin/FRUT/issues/${issue_number}"
   )
 

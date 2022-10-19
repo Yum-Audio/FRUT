@@ -77,7 +77,7 @@ FRUT currently contains:
   - ``examples`` and ``extras`` projects from `JUCE 5.4.7`_ (in `generated/JUCE-5.4.7`_)
   - ``examples`` and ``extras`` projects from `JUCE 6.0.5`_ (in `generated/JUCE-6.0.5`_)
   - ``examples`` and ``extras`` projects from `JUCE 6.1.6`_ (in `generated/JUCE-6.1.6`_)
-  - ``examples`` and ``extras`` projects from `JUCE 7.0.0`_ (in `generated/JUCE-7.0.0`_)
+  - ``examples`` and ``extras`` projects from `JUCE 7.0.2`_ (in `generated/JUCE-7.0.2`_)
 
 
 Requirements
@@ -101,14 +101,16 @@ known as "export targets"):
   </thead>
   <tbody>
     <tr><td align="center">✔️</td><td>Xcode (macOS)</td><td></td><td rowspan="2">
-      <a href="https://github.com/McMartin/FRUT/labels/exporter%3A%20Xcode">2 unsupported Xcode exporter settings</a>
+      <a href="https://github.com/McMartin/FRUT/labels/exporter%3A%20Xcode">4 unsupported Xcode exporter settings</a>
     </td></tr>
     <tr><td align="center">✔️</td><td>Xcode (iOS)</td><td>version 3.14 minimum<br/><pre>-G Xcode -DCMAKE_SYSTEM_NAME=iOS</pre></td></tr>
-    <tr><td align="center">✔️</td><td>Visual Studio 2022</td><td>version 3.21 minimum</td><td></td></tr>
-    <tr><td align="center">✔️</td><td>Visual Studio 2019</td><td>version 3.14 minimum</td><td></td></tr>
-    <tr><td align="center">✔️</td><td>Visual Studio 2017</td><td>version 3.7 minimum<br/>(3.13.3 when VS&nbsp;2019 is installed)</td><td></td></tr>
-    <tr><td align="center">✔️</td><td>Visual Studio 2015</td><td></td><td></td></tr>
-    <tr><td align="center">✔️</td><td>Visual Studio 2013</td><td></td><td></td></tr>
+    <tr><td align="center">✔️</td><td>Visual Studio 2022</td><td>version 3.21 minimum</td><td rowspan="5">
+      <a href="https://github.com/McMartin/FRUT/labels/exporter%3A%20Visual%20Studio">3 unsupported Visual Studio exporter settings</a>
+    </td></tr>
+    <tr><td align="center">✔️</td><td>Visual Studio 2019</td><td>version 3.14 minimum</td></tr>
+    <tr><td align="center">✔️</td><td>Visual Studio 2017</td><td>version 3.7 minimum<br/>(3.13.3 when VS&nbsp;2019 is installed)</td></tr>
+    <tr><td align="center">✔️</td><td>Visual Studio 2015</td><td></td></tr>
+    <tr><td align="center">✔️</td><td>Visual Studio 2013</td><td></td></tr>
     <tr><td align="center">✔️</td><td>Linux Makefile</td><td></td><td></td></tr>
     <tr><td align="center">❌</td><td>Android</td><td></td><td></td></tr>
     <tr><td align="center">✔️</td><td>Code::Blocks&nbsp;(Windows)</td><td></td><td></td></tr>
@@ -427,7 +429,7 @@ even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE
 .. _generated/JUCE-5.4.7: generated/JUCE-5.4.7
 .. _generated/JUCE-6.0.5: generated/JUCE-6.0.5
 .. _generated/JUCE-6.1.6: generated/JUCE-6.1.6
-.. _generated/JUCE-7.0.0: generated/JUCE-7.0.0
+.. _generated/JUCE-7.0.2: generated/JUCE-7.0.2
 
 .. _CMake Generators: https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html
 .. _CMake: https://cmake.org
@@ -441,7 +443,7 @@ even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE
 .. _JUCE 5.4.7: https://github.com/juce-framework/JUCE/tree/5.4.7
 .. _JUCE 6.0.5: https://github.com/juce-framework/JUCE/tree/6.0.5
 .. _JUCE 6.1.6: https://github.com/juce-framework/JUCE/tree/6.1.6
-.. _JUCE 7.0.0: https://github.com/juce-framework/JUCE/tree/7.0.0
+.. _JUCE 7.0.2: https://github.com/juce-framework/JUCE/tree/7.0.2
 .. _JUCE: https://github.com/juce-framework/JUCE
 .. _Projucer: https://juce.com/discover/projucer
 .. _all-contributors: https://github.com/all-contributors/all-contributors

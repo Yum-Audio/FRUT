@@ -35,7 +35,6 @@ jucer_project_settings(
   COMPANY_EMAIL "info@juce.com"
   USE_GLOBAL_APPCONFIG_HEADER OFF
   ADD_USING_NAMESPACE_JUCE_TO_JUCE_HEADER ON
-  REPORT_JUCE_APP_USAGE OFF # Required for closed source applications without an Indie or Pro JUCE license
   DISPLAY_THE_JUCE_SPLASH_SCREEN ON # Required for closed source applications without an Indie or Pro JUCE license
   PROJECT_TYPE "GUI Application"
   BUNDLE_IDENTIFIER "com.rmsl.jucedemorunner"
@@ -287,6 +286,7 @@ jucer_export_target(
     "Landscape Right"
   FILE_SHARING_ENABLED ON
   SUPPORT_DOCUMENT_BROWSER ON
+  REQUIRES_FULL_SCREEN OFF
   MICROPHONE_ACCESS ON
   CAMERA_ACCESS ON
   BLUETOOTH_ACCESS ON
