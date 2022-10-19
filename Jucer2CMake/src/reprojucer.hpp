@@ -1664,6 +1664,8 @@ inline void writeReprojucerCMakeLists(const Arguments& args,
                                      "SUPPORT_DOCUMENT_BROWSER", {});
         convertOnOffSettingIfDefined(exporter, "UIStatusBarHidden", "STATUS_BAR_HIDDEN",
                                      {});
+        convertOnOffSettingIfDefined(exporter, "UIRequiresFullScreen",
+                                     "REQUIRES_FULL_SCREEN", {});
       }
 
       if (exporterType == "XCODE_MAC")
@@ -1676,6 +1678,18 @@ inline void writeReprojucerCMakeLists(const Arguments& args,
               return juce::StringArray::fromTokens(value, ",", {});
             });
         }
+      }
+
+      convertOnOffSettingIfDefined(exporter, "useLegacyBuildSystem",
+                                   "USE_LEGACY_BUILD_SYSTEM", {});
+
+      if (exporterType == "XCODE_MAC")
+      {
+        convertSettingAsListIfDefined(exporter, "xcodeValidArchs", "VALID_ARCHITECTURES",
+                                      [](const juce::String& value) {
+                                        return juce::StringArray::fromTokens(value, ",",
+                                                                             {});
+                                      });
 
         convertOnOffSettingIfDefined(exporter, "appSandbox", "USE_APP_SANDBOX", {});
         convertOnOffSettingIfDefined(exporter, "appSandboxInheritance",
@@ -1876,6 +1890,9 @@ inline void writeReprojucerCMakeLists(const Arguments& args,
         convertSettingIfDefined(exporter, "pListPrefixHeader", "PLIST_PREFIX_HEADER",
                                 convertPrefixHeader);
 
+        convertOnOffSettingIfDefined(exporter, "suppressPlistResourceUsage",
+                                     "SUPPRESS_AUDIOUNIT_PLIST_RESOURCE_USAGE_KEY", {});
+
         convertSettingAsListIfDefined(
           exporter, "extraFrameworks",
           jucerVersionAsTuple > Version{5, 3, 2} ? "EXTRA_SYSTEM_FRAMEWORKS"
@@ -1960,6 +1977,28 @@ inline void writeReprojucerCMakeLists(const Arguments& args,
 
             return {};
           });
+
+        convertSettingIfDefined(exporter, "IPP1ALibrary", "USE_IPP_LIBRARY_ONE_API",
+                                [](const juce::String& value) -> juce::String {
+                                  if (value.isEmpty())
+                                    return "No";
+
+                                  if (value == "true")
+                                    return "Yes (Default Linking)";
+
+                                  if (value == "Static_Library")
+                                    return "Static Library";
+
+                                  if (value == "Dynamic_Library")
+                                    return "Dynamic Library";
+
+                                  return value;
+                                });
+
+        convertSettingIfDefined(exporter, "MKL1ALibrary", "USE_MKL_LIBRARY_ONE_API",
+                                [](const juce::String& value) -> juce::String {
+                                  return value.isEmpty() ? "No" : value;
+                                });
 
         convertSettingIfDefined(exporter, "windowsTargetPlatformVersion",
                                 "WINDOWS_TARGET_PLATFORM", {});
@@ -2103,6 +2142,15 @@ inline void writeReprojucerCMakeLists(const Arguments& args,
 
                                          return "OFF";
                                        });
+        }
+
+        if (isXcodeExporter || isVSExporter)
+        {
+          convertOnOffSettingIfDefined(configuration, "usePrecompiledHeaderFile",
+                                       "USE_PRECOMPILED_HEADER", {});
+
+          convertSettingIfDefined(configuration, "precompiledHeaderFile",
+                                  "PRECOMPILED_HEADER_FILE", {});
         }
 
         if (isXcodeExporter)
