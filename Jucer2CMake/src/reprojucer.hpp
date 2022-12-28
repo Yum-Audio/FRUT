@@ -767,6 +767,10 @@ inline void writeReprojucerCMakeLists(const Arguments& args,
                        return {};
                      });
     }
+    else if (jucerVersionAsTuple >= Version{7, 0, 3})
+    {
+      writeQuoted("CXX_LANGUAGE_STANDARD", "C++17");
+    }
     else if (jucerVersionAsTuple > Version{5, 2, 0})
     {
       writeQuoted("CXX_LANGUAGE_STANDARD", "C++14");
@@ -1273,7 +1277,7 @@ inline void writeReprojucerCMakeLists(const Arguments& args,
       {
         if (line.startsWith("/** Config: "))
         {
-          const auto moduleOption = line.substring(12);
+          const auto moduleOption = line.substring(12).trim();
           const auto& optionValue = modulesOptions.getStringAttribute(moduleOption);
 
           if (optionValue == "1" || optionValue == "enabled")
