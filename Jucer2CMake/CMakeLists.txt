@@ -69,6 +69,7 @@ if(APPLE)
   target_compile_options(Jucer2CMake_JUCE PRIVATE
     -Wno-deprecated-declarations
     -Wno-register
+    -Wno-poison-system-directories
   )
 
   find_library(Cocoa_framework "Cocoa")
@@ -127,6 +128,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     -Wno-c++98-compat-pedantic
     -Wno-exit-time-destructors
     -Wno-padded
+    -Wno-poison-system-directories
   )
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   target_compile_options(Jucer2CMake PRIVATE -Werror -Wall -Wextra)
