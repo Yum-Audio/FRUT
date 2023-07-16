@@ -77,7 +77,7 @@ FRUT currently contains:
   - ``examples`` and ``extras`` projects from `JUCE 5.4.7`_ (in `generated/JUCE-5.4.7`_)
   - ``examples`` and ``extras`` projects from `JUCE 6.0.5`_ (in `generated/JUCE-6.0.5`_)
   - ``examples`` and ``extras`` projects from `JUCE 6.1.6`_ (in `generated/JUCE-6.1.6`_)
-  - ``examples`` and ``extras`` projects from `JUCE 7.0.3`_ (in `generated/JUCE-7.0.3`_)
+  - ``examples`` and ``extras`` projects from `JUCE 7.0.5`_ (in `generated/JUCE-7.0.5`_)
 
 
 Requirements
@@ -306,6 +306,7 @@ contributors:
       <a href="https://github.com/dimitrisudell"><img src="https://github.com/dimitrisudell.png" width="100"><br />Dimitri Sudell</a>
       <br />
       <a href="https://github.com/McMartin/FRUT/issues?q=is%3Aissue+author%3Adimitrisudell" title="Bug reports">🐛</a>
+      <a href="https://github.com/McMartin/FRUT/pulls?q=state%3Amerged+reviewed-by%3Adimitrisudell+-author%3Adimitrisudell" title="Pull Request reviews">👀</a>
     </td>
     <td>
       <a href="https://github.com/danra"><img src="https://github.com/danra.png" width="100"><br />Dan Raviv</a>
@@ -380,6 +381,23 @@ contributors:
       <a href="https://github.com/McMartin/FRUT/pulls?q=state%3Amerged+author%3ARiuzakiii" title="Code">💻</a>
     </td>
   </tr>
+  <tr>
+    <td>
+      <a href="https://github.com/hsetlik"><img src="https://github.com/hsetlik.png" width="100"><br />Hayden Setlik</a>
+      <br />
+      <a href="https://github.com/McMartin/FRUT/issues?q=is%3Aissue+author%3Ahsetlik" title="Bug reports">🐛</a>
+    </td>
+    <td>
+    </td>
+    <td>
+    </td>
+    <td>
+    </td>
+    <td>
+    </td>
+    <td>
+    </td>
+  </tr>
   </tbody>
   </table>
 
@@ -429,7 +447,7 @@ even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE
 .. _generated/JUCE-5.4.7: generated/JUCE-5.4.7
 .. _generated/JUCE-6.0.5: generated/JUCE-6.0.5
 .. _generated/JUCE-6.1.6: generated/JUCE-6.1.6
-.. _generated/JUCE-7.0.3: generated/JUCE-7.0.3
+.. _generated/JUCE-7.0.5: generated/JUCE-7.0.5
 
 .. _CMake Generators: https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html
 .. _CMake: https://cmake.org
@@ -443,7 +461,7 @@ even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE
 .. _JUCE 5.4.7: https://github.com/juce-framework/JUCE/tree/5.4.7
 .. _JUCE 6.0.5: https://github.com/juce-framework/JUCE/tree/6.0.5
 .. _JUCE 6.1.6: https://github.com/juce-framework/JUCE/tree/6.1.6
-.. _JUCE 7.0.3: https://github.com/juce-framework/JUCE/tree/7.0.3
+.. _JUCE 7.0.5: https://github.com/juce-framework/JUCE/tree/7.0.5
 .. _JUCE: https://github.com/juce-framework/JUCE
 .. _Projucer: https://juce.com/discover/projucer
 .. _all-contributors: https://github.com/all-contributors/all-contributors
